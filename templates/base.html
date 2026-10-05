@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Calorie Counter{% endblock %}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight text-white">CalorieTrack</h1>
+            </div>
+            <span class="text-xs px-3 py-1 bg-slate-800 text-slate-400 rounded-full border border-slate-700">
+                Today: {{ today_date|date:"M d, Y" }}
+            </span>
+        </div>
+    </header>
+
+    <!-- Alert Messages -->
+    <div class="max-w-5xl mx-auto px-4 pt-4 w-full">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="p-4 mb-3 text-sm rounded-lg flex items-center justify-between transition-all
+                    {% if message.tags == 'success' %}bg-emerald-950/60 border border-emerald-800 text-emerald-300
+                    {% elif message.tags == 'warning' %}bg-amber-950/60 border border-amber-800 text-amber-300
+                    {% else %}bg-slate-800 border border-slate-700 text-slate-200{% endif %}">
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Main Content Body -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-6 text-center text-sm text-slate-500 mt-auto">
+        <p>Built with Django & Tailwind CSS — Calorie Counter Application</p>
+    </footer>
+
+</body>
+</html>

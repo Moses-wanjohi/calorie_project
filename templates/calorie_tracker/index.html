@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Calorie Tracker{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Top Row Cards: Counter Summary & Form -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Stat Card: Total Calories Consumed -->
+        <div class="lg:col-span-1 bg-slate-800/80 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Consumed Today</p>
+                <div class="mt-4 flex items-baseline space-x-2">
+                    <span class="text-5xl font-extrabold text-white tracking-tight">{{ total_calories }}</span>
+                    <span class="text-lg text-emerald-400 font-medium">kcal</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">
+                    Logged items count: <span class="text-slate-200 font-semibold">{{ items.count }}</span>
+                </p>
+            </div>
+
+            <!-- Reset Daily Count Button -->
+            <div class="mt-8 pt-4 border-t border-slate-700/60">
+                <form action="{% url 'calorie_tracker:reset_calories' %}" method="POST" onsubmit="return confirm('Are you sure you want to reset today\'s calorie count? All items logged today will be cleared.');">
+                    {% csrf_token %}
+                    <button type="submit" 
+                        class="w-full py-2.5 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-medium text-sm rounded-xl transition flex items-center justify-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        <span>Reset Daily Counter</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Food Item Form Card -->
+        <div class="lg:col-span-2 bg-slate-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl">
+            <h2 class="text-lg font-bold text-white mb-1">Add Food Item</h2>
+            <p class="text-xs text-slate-400 mb-6">Record a food or meal item along with its calorie value.</p>
+
+            <form method="POST" action="{% url 'calorie_tracker:index' %}" class="space-y-4">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2 space-y-1">
+                        <label for="{{ form.name.id_for_label }}" class="block text-xs font-medium text-slate-300">Food Name</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="space-y-1">
+                        <label for="{{ form.calories.id_for_label }}" class="block text-xs font-medium text-slate-300">Calories (kcal)</label>
+                        {{ form.calories }}
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full md:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-emerald-900/30 flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span>Add Item</span>
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Food Log List Table -->
+    <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-white">Today's Logged Items</h2>
+            <span class="text-xs text-slate-400">{{ items.count }} total entry(ies)</span>
+        </div>
+
+        {% if items %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-900/60 text-xs uppercase text-slate-400 border-b border-slate-700">
+                        <tr>
+                            <th class="py-3 px-4">Food Item</th>
+                            <th class="py-3 px-4">Time Added</th>
+                            <th class="py-3 px-4 text-right">Calories</th>
+                            <th class="py-3 px-4 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700/50">
+                        {% for item in items %}
+                            <tr class="hover:bg-slate-700/30 transition">
+                                <td class="py-3.5 px-4 font-medium text-white">{{ item.name }}</td>
+                                <td class="py-3.5 px-4 text-xs text-slate-400">{{ item.date_added|date:"H:i A" }}</td>
+                                <td class="py-3.5 px-4 text-right font-bold text-emerald-400">{{ item.calories }} kcal</td>
+                                <td class="py-3.5 px-4 text-center">
+                                    <form action="{% url 'calorie_tracker:delete_item' item.id %}" method="POST" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" title="Remove item" 
+                                            class="text-slate-400 hover:text-red-400 p-1 rounded transition">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="py-12 text-center text-slate-400 border-2 border-dashed border-slate-700/50 rounded-xl">
+                <svg class="w-12 h-12 mx-auto mb-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <p class="text-sm font-medium">No food items recorded for today yet.</p>
+                <p class="text-xs text-slate-500 mt-1">Use the form above to start tracking your meal calories!</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
